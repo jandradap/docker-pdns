@@ -1,5 +1,18 @@
 FROM ubuntu:trusty
-MAINTAINER Patrick Oberdorf <patrick@oberdorf.net>
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+			org.label-schema.name="docker-pdns" \
+			org.label-schema.description="PowerDNS Authoritative server and Poweradmin" \
+			org.label-schema.url="http://andradaprieto.es" \
+			org.label-schema.vcs-ref=$VCS_REF \
+			org.label-schema.vcs-url="https://github.com/jandradap/LARP" \
+			org.label-schema.vendor="Jorge Andrada Prieto" \
+			org.label-schema.version=$VERSION \
+			org.label-schema.schema-version="1.0" \
+			maintainer="Jorge Andrada Prieto <jandradap@gmail.com>" \
+			org.label-schema.docker.cmd="docker run --name pdns-master --link mysql:db -d -p 53:53/udp -p 53:53 -p 8080:80 jorgeandrada/docker-pdns"
 
 COPY assets/apt/preferences.d/pdns /etc/apt/preferences.d/pdns
 RUN apt-get update && apt-get install -y curl \
@@ -38,9 +51,9 @@ COPY assets/pdns/pdns.d/ /etc/powerdns/pdns.d/
 COPY assets/mysql/pdns.sql /pdns.sql
 
 ### PHP/Nginx ###
-RUN rm /etc/nginx/sites-enabled/default
-RUN php5enmod mcrypt
-RUN mkdir -p /var/www/html/ \
+RUN rm /etc/nginx/sites-enabled/default && \
+	php5enmod mcrypt && \
+	mkdir -p /var/www/html/ \
 	&& cd /var/www/html \
 	&& git clone https://github.com/wociscz/poweradmin.git . \
 	&& git checkout 98ecbb5692d4f9bc42110ec478be63eb5651c6de \
